@@ -73,3 +73,41 @@ def draw_images(images: List[Image.Image], texts: List[str] = ['', '', '', '', '
         axs[i].text(0.5, -0.1, texts[i], va='bottom', ha='center', fontsize=10, transform=axs[i].transAxes)
 
     plt.show()
+
+
+def tensor2np(tensor):
+    if tensor.is_cuda:
+      numpy_array = tensor.cpu().numpy()
+    else:
+      numpy_array = tensor.numpy()
+
+    return numpy_array
+
+def detect_objects(img_path, model):
+    img = Image.open(img_path)
+    results = model(img, size=1280, augment=True)
+
+    pred_dict = dict()
+    predictions =results.pred[0]
+
+    pred_dict['boxes'] = tensor2np(predictions[:, :4]) # x1, y1, x2, y2
+    pred_dict['scores'] = tensor2np(predictions[:, 4])
+    pred_dict['categories'] = tensor2np(predictions[:, 5])
+
+    categories = results.names
+    pred_dict['labels'] = [categories[i] for i in pred_dict['categories']]
+
+    return results, pred_dict
+
+def filter_furniture(detections):
+    furniture_class = [56, 57, 59, 60] # detections[0].names
+    furniture_names = ['chair', 'couch', 'bed', 'dining table']
+    furniture_detected = {}
+
+    filter = [True if i in furniture_names else False for i in detections[1]['labels']]
+    furniture_detected['boxes'] = detections[1]['boxes'][filter]
+    furniture_detected['scores'] = detections[1]['scores'][filter]
+    furniture_detected['categories'] = detections[1]['categories'][filter]
+    furniture_detected['lables'] = [item for item, bool in zip(detections[1]['labels'], filter) if bool==True]
+    
+    return furniture_detected
