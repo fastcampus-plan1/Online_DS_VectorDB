@@ -55,15 +55,25 @@ def search_similar_vector(query_feature: np.array, features: List[np.array], top
     return topk_indices, topk_similarities
 
 
-def normal_chat_completion(input_prompt, model='gpt-4-turbo-preview'):
+def normal_chat_completion(input_prompt: str, model: str = 'gpt-4-turbo-preview') -> dict:
+    """
+    Openai chat completion을 활용하여 JSON output 생성
+
+    Args:
+        input_prompt (str): The input prompt to the chat model.
+        model (str, optional): Model name. Defaults to 'gpt-4-turbo-preview'.
+
+    Returns:
+        dict: The chat completion response formatted as a JSON object.
+    """
     client = openai.OpenAI()
 
     response = client.chat.completions.create(
         model=model,
-        response_format={ "type": "json_object" },
+        response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": 'You are a smart and intelligent program that understands information and provides output in JSON format'},
-            {"role": "user", "content":input_prompt}
+            {"role": "user", "content": input_prompt}
         ]
-        )
+    )
     return response
