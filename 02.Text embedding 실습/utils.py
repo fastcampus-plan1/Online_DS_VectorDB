@@ -2,6 +2,7 @@ import numpy as np
 from numpy.linalg import norm
 from typing import List, Tuple
 from openai import OpenAI
+import openai
 
 def cosine_similarity(vector_a, vector_b):
     """Calculate the cosine similarity between two vectors."""
@@ -52,3 +53,17 @@ def search_similar_vector(query_feature: np.array, features: List[np.array], top
     topk_similarities = similarities[sorted_indices_desc]
 
     return topk_indices, topk_similarities
+
+
+def normal_chat_completion(input_prompt, model='gpt-4-turbo-preview'):
+    client = openai.OpenAI()
+
+    response = client.chat.completions.create(
+        model=model,
+        response_format={ "type": "json_object" },
+        messages=[
+            {"role": "system", "content": 'You are a smart and intelligent program that understands information and provides output in JSON format'},
+            {"role": "user", "content":input_prompt}
+        ]
+        )
+    return response
